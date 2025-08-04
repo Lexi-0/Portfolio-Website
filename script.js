@@ -327,14 +327,32 @@ contactForm.addEventListener('submit', function(e) {
     submitBtn.disabled = true;
     submitBtn.style.opacity = '0.7';
     
-    // Simulate form submission
-    setTimeout(() => {
-        showNotification('Thank you for your message! I\'ll get back to you soon.', 'success');
-        this.reset();
+    // Send data to Formspree
+    fetch('https://formspree.io/f/movlkjna', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            showNotification('Thank you for your message! I\'ll get back to you soon.', 'success');
+            contactForm.reset();
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message || 'Something went wrong.');
+            });
+        }
+    })
+    .catch(() => {
+        showNotification('Oops! Something went wrong. Try again later.', 'error');
+    })
+    .finally(() => {
         submitBtn.querySelector('span').textContent = originalText;
         submitBtn.disabled = false;
         submitBtn.style.opacity = '1';
-    }, 2000);
+    });
 });
 
 // Email validation
